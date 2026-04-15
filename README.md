@@ -15,9 +15,19 @@ Checksum Generator is a command-line tool written in Rust that recursively gener
 ## Installation
 
 ```bash
-git clone [https://github.com/tghezfs/cksum.git](https://github.com/tghezfs/cksum.git)
+# Option 1: Quick install via cargo
+cargo install --git https://github.com
+
+# OR
+
+# Option 2: Manual build from source
+git clone https://github.com
 cd cksum
 cargo build --release
+
+# Move binary to PATH and ensure execution permissions
+sudo mv target/release/cksum /usr/local/bin/
+chmod +x /usr/local/bin/cksum
 ```
 
 **Binary location:** target/release/cksum
