@@ -4,11 +4,11 @@ use std::io::{ Error, ErrorKind };
 #[derive(Parser, Debug)]
 #[command(version, about, long_about = None)]
 pub struct Args {
-    #[arg(short, long)]
+    #[arg(short, long, value_name = "Path of Dir or File")]
     pub path: String,
 
-    #[arg(short, long)]
-    pub algorythm: String
+    #[arg(short, long, value_name = "Hash Algorithm: md5 | sha256 | blake3")]
+    pub algorithm: String
 }
 
 #[derive(Debug)]
@@ -27,7 +27,7 @@ pub fn parse_algo(algo: &str) -> Result<Algo, Box<dyn std::error::Error>> {
             Box::new(
                 Error::new(
                     ErrorKind::InvalidInput, 
-                    "Invalid Algorythm. Use: md5, sha256 or blake3"
+                    "Invalid Algorithm. Use: md5, sha256 or blake3"
                 )
             )
         )
@@ -70,6 +70,6 @@ mod tests {
         
         // Optional: Verify that the error message contains what is expected
         let err_msg = result.unwrap_err().to_string();
-        assert!(err_msg.contains("Invalid Algorythm"));
+        assert!(err_msg.contains("Invalid Algorithm"));
     }
 }

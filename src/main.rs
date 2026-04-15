@@ -28,7 +28,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         return Err(Box::new(error));
     }
 
-    let algo = parse_algo(&args.algorythm)?;
+    let algo = parse_algo(&args.algorithm)?;
     let metadata = fs::metadata(path)?;
     let parent: &Path = get_parent(metadata, path);
     let mut temp_file = create_temp_file(parent)?;

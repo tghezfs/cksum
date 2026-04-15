@@ -202,7 +202,7 @@ fn test_fails_on_invalid_algorithm() {
     assert!(!output.status.success());
     
     let stderr = String::from_utf8_lossy(&output.stderr);
-    assert!(stderr.contains("Invalid Algorythm") || 
+    assert!(stderr.contains("Invalid Algorithm") || 
             stderr.contains("invalid") ||
             stderr.contains("Usage"));
 }
