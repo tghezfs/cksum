@@ -49,7 +49,7 @@ fn test_main_sha256_valid_directory() -> Result<(), Box<dyn std::error::Error>> 
 
     let output = run_app(vec![
         "--path", dir_path.to_str().unwrap(), 
-        "--algorythm", "sha256"
+        "--algorithm", "sha256"
     ])?;
 
     assert!(output.status.success(), 
@@ -95,7 +95,7 @@ fn test_main_md5_valid_directory() -> Result<(), Box<dyn std::error::Error>> {
 
     let output = run_app(vec![
         "--path", dir_path.to_str().unwrap(), 
-        "--algorythm", "md5"
+        "--algorithm", "md5"
     ])?;
 
     assert!(output.status.success());
@@ -135,7 +135,7 @@ fn test_main_blake3_valid_directory() -> Result<(), Box<dyn std::error::Error>> 
 
     let output = run_app(vec![
         "--path", dir_path.to_str().unwrap(), 
-        "--algorythm", "blake3"
+        "--algorithm", "blake3"
     ])?;
 
     assert!(output.status.success());
@@ -172,7 +172,7 @@ fn test_fails_on_nonexistent_path() {
 
     match run_app(vec![
         "--path", fake_path, 
-        "--algorythm", "sha256"
+        "--algorithm", "sha256"
     ]) {
         Ok(output) => {
             assert!(!output.status.success());
@@ -196,7 +196,7 @@ fn test_fails_on_invalid_algorithm() {
 
     let output = run_app(vec![
         "--path", temp_dir.path().to_str().unwrap(), 
-        "--algorythm", "algoritmo_inexistente_123"
+        "--algorithm", "algoritmo_inexistente_123"
     ]).expect("Failed to run binary");
 
     assert!(!output.status.success());
@@ -214,7 +214,7 @@ fn test_empty_directory_no_files() -> Result<(), Box<dyn std::error::Error>> {
 
     let output = run_app(vec![
         "--path", dir_path.to_str().unwrap(), 
-        "--algorythm", "sha256"
+        "--algorithm", "sha256"
     ])?;
 
     assert!(output.status.success());
@@ -248,11 +248,10 @@ fn test_nested_directories_processed() -> Result<(), Box<dyn std::error::Error>>
 
     let output = run_app(vec![
         "--path", dir_path.to_str().unwrap(), 
-        "--algorythm", "sha256"
+        "--algorithm", "sha256"
     ])?;
 
     assert!(output.status.success());
-
     wait_for_io();
 
     let entries: Vec<_> = WalkDir::new(dir_path)
@@ -263,7 +262,7 @@ fn test_nested_directories_processed() -> Result<(), Box<dyn std::error::Error>>
         .map(|e| e.file_name().to_string_lossy().to_string())
         .collect();
 
-    assert!(entries.len() >= 4, "Should have 3 original files + 1 checksum = {} found", entries.len());
+    assert!(entries.len() >= 4);
 
     let checksum_files: Vec<_> = entries.iter()
         .filter(|name| name.starts_with("checksums_") && name.ends_with(".txt"))
@@ -274,10 +273,10 @@ fn test_nested_directories_processed() -> Result<(), Box<dyn std::error::Error>>
 
     let content = fs::read_to_string(&dir_path.join(&checksum_files[0]))?;
     
-    // Check content contains the filenames (with or without path)
+    // Now checks for RELATIVE PATHS
     assert!(content.contains("root.txt"));
-    assert!(content.contains("level1.txt"));
-    assert!(content.contains("level2.txt"));
+    assert!(content.contains("folder1/level1.txt"));
+    assert!(content.contains("folder1/subfolder2/level2.txt"));
 
     Ok(())
 }
@@ -293,7 +292,7 @@ fn test_skip_temp_and_final_prefixes() -> Result<(), Box<dyn std::error::Error>>
 
     let output = run_app(vec![
         "--path", dir_path.to_str().unwrap(), 
-        "--algorythm", "sha256"
+        "--algorithm", "sha256"
     ])?;
 
     assert!(output.status.success());
@@ -336,7 +335,7 @@ fn test_case_insensitive_algorithm_input() {
     for algo in algorithms {
         let output = run_app(vec![
             "--path", dir_path.to_str().unwrap(), 
-            "--algorythm", algo
+            "--algorithm", algo
         ]).expect("Failed to run");
         
         assert!(output.status.success(), 
@@ -354,7 +353,7 @@ fn test_file_permissions_on_checksum() -> Result<(), Box<dyn std::error::Error>>
 
         let output = run_app(vec![
             "--path", dir_path.to_str().unwrap(), 
-            "--algorythm", "sha256"
+            "--algorithm", "sha256"
         ])?;
 
         assert!(output.status.success());

@@ -30,8 +30,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let algo = parse_algo(&args.algorithm)?;
     let metadata = fs::metadata(path)?;
-    let parent: &Path = get_parent(metadata, path);
-    let mut temp_file = create_temp_file(parent)?;
+    let base_path: &Path = get_parent(metadata, path);
+    let mut temp_file = create_temp_file(base_path)?;
     let mut buffer = [0; BUFFER_SIZE];
 
     for entry_res in WalkDir::new(&path) {
@@ -48,11 +48,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         if entry_metadata.is_file() && 
             !name.starts_with(FINAL_PREFIX) && 
             !name.starts_with(TEMP_PREFIX) {
-            process_file(entry_path, name, &mut buffer, &algo, &mut temp_file)?;
+            process_file(base_path, entry_path, &mut buffer, &algo, &mut temp_file)?;
         }
     }
 
     let timestamp: String = Local::now().format("%Y-%m-%d-%H%M%S").to_string();
 
-    finalize_checksum_file(temp_file, parent, &timestamp)
+    finalize_checksum_file(temp_file, base_path, &timestamp)
 }

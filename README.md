@@ -7,6 +7,7 @@ Checksum Generator is a command-line tool written in Rust that recursively gener
 ## Features
 
 - **Recursive Processing:** Scans all files within a directory and its subdirectories.
+- **Relative Paths:** Stores file paths relative to the target directory (e.g., `folder/file.txt`).
 - **Algorithm Support:** Supports MD5, SHA256, and BLAKE3 hash algorithms.
 - **Security:** Generates read-only checksum files (mode 444) with timestamps.
 - **Smart Filtering:** Automatically skips temporary (`.tmp-checksums_`) and existing (`checksums_`) files.
@@ -60,14 +61,15 @@ Creates a file named `checksums_YYYY-MM-DD-HHMMSS.txt` in the target directory:
 **Format:**
 
 ```plaintext
-<algorithm> <hash> <filename>
+<algorithm> <hash> <relative_path>
 ```
 
 **Example:**
 
 ```plaintext
 sha256 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 example.txt
-md5 5d41402abc4b2a76b9719d911017c592 document.pdf
+md5 5d41402abc4b2a76b9719d911017c592 folder/document.pdf
+blake3 11e58bf3d7e84c41c6d8c2c2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2 subfolder/file.txt
 ```
 
 ## Testing
@@ -87,6 +89,7 @@ cargo test
 - Case-insensitive algorithm input
 - Prefix skipping (.tmp-checksums\_, checksums\_)
 - Read-only permissions (Unix)
+- Relative paths in output (nested directories)
 
 ### Not covered
 
