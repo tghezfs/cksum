@@ -388,3 +388,58 @@ fn test_file_permissions_on_checksum() -> Result<(), Box<dyn std::error::Error>>
 
     Ok(())
 }
+
+#[test]
+fn test_relative_path_current_directory() -> Result<(), Box<dyn std::error::Error>> {
+    let temp_dir = tempfile::tempdir()?;
+    let dir_path = temp_dir.path();
+    fs::write(dir_path.join("test.txt"), "content")?;
+
+    // Change to the temp directory
+    let original_dir = std::env::current_dir()?;
+    std::env::set_current_dir(dir_path)?;
+
+    let output = run_app(vec![
+        "--path", ".",  // Relative path: current directory
+        "--algorithm", "sha256"
+    ])?;
+
+    std::env::set_current_dir(original_dir)?;
+
+    assert!(output.status.success());
+    
+    let _checksum_file = dir_path.join("checksums_");
+    let files: Vec<_> = fs::read_dir(dir_path)?
+        .filter_map(|e| e.ok())
+        .filter(|e| e.file_name().to_string_lossy().starts_with("checksums_"))
+        .collect();
+    
+    assert!(!files.is_empty());
+    Ok(())
+}
+
+#[test]
+fn test_relative_path_parent_directory() -> Result<(), Box<dyn std::error::Error>> {
+    let temp_dir = tempfile::tempdir()?;
+    let subdir = temp_dir.path().join("subdir");
+    fs::create_dir(&subdir)?;
+    fs::write(subdir.join("test.txt"), "content")?;
+
+    // Change to subdir
+    std::env::set_current_dir(&subdir)?;
+
+    let output = run_app(vec![
+        "--path", "..",  // Relative path: parent directory
+        "--algorithm", "sha256"
+    ])?;
+
+    assert!(output.status.success());
+    
+    let files: Vec<_> = fs::read_dir(temp_dir.path())?
+        .filter_map(|e| e.ok())
+        .filter(|e| e.file_name().to_string_lossy().starts_with("checksums_"))
+        .collect();
+    
+    assert!(!files.is_empty());
+    Ok(())
+}

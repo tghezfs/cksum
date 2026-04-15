@@ -20,8 +20,9 @@ use config::{ BUFFER_SIZE, TEMP_PREFIX, FINAL_PREFIX};
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let args: Args = Args::parse();
     let path: &Path = Path::new(&args.path);
+    let abs_path = fs::canonicalize(path)?; 
 
-    let exists = path.try_exists()?;
+    let exists = abs_path.try_exists()?;
     if !exists {
         let error = Error::new(ErrorKind::NotFound, "Path Doesn't exists");
 
@@ -29,12 +30,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     }
 
     let algo = parse_algo(&args.algorithm)?;
-    let metadata = fs::metadata(path)?;
-    let base_path: &Path = get_parent(metadata, path);
+    let metadata = fs::metadata(&abs_path)?;
+    let base_path: &Path = get_parent(metadata, &abs_path);
     let mut temp_file = create_temp_file(base_path)?;
     let mut buffer = [0; BUFFER_SIZE];
 
-    for entry_res in WalkDir::new(&path) {
+    for entry_res in WalkDir::new(&abs_path) {
         let entry = entry_res?;
         let entry_path = entry.path();
         let entry_metadata = entry.metadata()?;
